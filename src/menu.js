@@ -232,19 +232,21 @@ Game.UpdateMenu = function() {
         l('menu').innerHTML += str;
     } else if (Game.onMenu=='stats') {
         var achievementsStr = '';
-        for(var i in AA.achievements) {
-            achievementsStr += AA.createAchievementIcon(AA.achievements[i]);
+        var sortedAchievements = AA.achievementManager.sortedAchievements;
+        for(var i = 0, n = sortedAchievements.length; i < n; i++) {
+            achievementsStr += AA.createAchievementIcon(sortedAchievements[i]);
         }
 
-        var totalUpgrades = AA.upgradeManager.sortedUnlockedUpgrades.length;
+        var sortedUpgrades = AA.upgradeManager.sortedUnlockedUpgrades;
+        var totalUpgrades = sortedUpgrades.length;
         var ownedUpgrades = 0;
         for(var i = 0; i < totalUpgrades; i++) {
-            if(AA.upgradeManager.sortedUnlockedUpgrades[i].owned) ownedUpgrades++;
+            if(sortedUpgrades[i].owned) ownedUpgrades++;
         }
 
         var upgradesStr = '';
-        for(var i in AA.upgradeManager.sortedUnlockedUpgrades) {
-            upgradesStr += AA.createUpgradeIcon(AA.upgradeManager.sortedUnlockedUpgrades[i]);
+        for(var i in sortedUpgrades) {
+            upgradesStr += AA.createUpgradeIcon(sortedUpgrades[i]);
         }
 
         var str = ''
@@ -260,7 +262,7 @@ Game.UpdateMenu = function() {
             + '<div class="subsection">'
             + '  <div class="title">Arnott\'s Mod Achievements</div>'
             + '  <div class="listing">'
-            + '    <b>Unlocked : '+AA.achievementsEarned+'/'+AA.achievementsAvailable+'</b>'
+            + '    <b>Unlocked : '+AA.achievementManager.getNumEarned()+'/'+AA.achievementManager.getNumAchievements()+'</b>'
             + '  </div>'
 /*
             + '  <div class="listing">'

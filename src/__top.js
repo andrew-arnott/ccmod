@@ -21,14 +21,6 @@ if (Game.beta) AA.constants.saveTo += "Beta";
 AA.config = {};
 AA.config.useSpam = false;
 
-//Custom achievements (added outside of Orteil's code to be a bit more flexible)
-AA.achievements = {};
-AA.achievementsEarned = 0;
-AA.achievementsAvailable = 0;
-
-//Custom upgrades
-AA.upgrades = {};
-
 //New tier 2 resource: Ambrosia cookies
 AA.ambrosia = 0;
 
@@ -40,32 +32,90 @@ AA.buildings = {};
 // Achievement functions //
 ///////////////////////////
 
+AA.AchievementManager = function() {
+    this.achievements = {};
+    this.sortedAchievements = [];
+}
+
 /**
  * Creates a generic achievement data object and adds it to my achievement list. This
  * stuff is separate from Orteil's code so that it will be less likely to break.
- * 
- * @param name
+ *
+ * If the achievement already exists (generally this is the case for save data),
+ * then the data is merged with the existing achievement data already present in
+ * the list. This helps avoid versioning problems that might occur.
+ *
+ * @param data {name, description, image, won}
  *
  */
-AA.createAchievement = function(name, description, image) {
-    //Whatever. It's going to be a lame ol' generic object because I roll that way.
-    var achievement = {};
-    achievement.name = name;
-    achievement.description = description;
-    achievement.image = image;
-    achievement.won = false;
+AA.AchievementManager.prototype.createAchievement = function(data) {
+    var defaults = {
+        name: "ERROR: No name",
+        description: "ERROR: No description",
+        image : "",
+        won: false
+    };
 
-    AA.achievements[name] = achievement;
-    AA.achievementsAvailable++;
+    var achievement = JQuery.extend({}, defaults, data);
+
+    var newAchievement;
+
+    //Merge this upgrade object into the list of upgrades. Since save data is
+    //loaded after the basic upgrades are made, it will overwrite any base
+    //data, as required.
+    if(this.achievements.hasOwnProperty(achievement.name)) {
+        var oldAchievement = this.achievements[achievement.name];
+        //Merge with the old upgrade
+        newAchievement = JQuery.extend({}, oldAchievement, achievement);
+    } else {
+        newAchievement = achievement;
+    }
+
+    this.achievements[achievement.name] = newAchievement;
+
+    //Add it to the sortedList if unlocked
+    this.addToSortedList(newAchievement);
 }
 
-AA.earnAchievement = function(name) {
-    //No such achievement
-    if(typeof AA.achievements[name] === 'undefined') return;
-    //Already earned
-    if(AA.achievements[name].won) return;
+AA.AchievementManager.prototype.addToSortedList = function(achievement) {
+    if(typeof achievement === 'undefined') return; 
 
-    AA.achievements[name].won = true;
+/*    var sortMap = function(a,b) {
+        if (a.name > b.baseCost) return 1;
+        else if (a.baseCost < b.baseCost) return -1;
+        else return 0;
+    }
+*/
+    this.sortedAchievements.push(achievement);
+//    this.sortedAchievements.sort(sortMap);
+}
+
+
+/**
+ * Returns the total number of custom achievements available.
+ *
+ */
+AA.AchievementManager.prototype.getNumAchievements = function () {
+    return Object.keys(this.achievements).length;
+}
+
+AA.AchievementManager.prototype.getNumEarned = function() {
+    var total = 0;
+    for(var i in this.achievements) {
+        if(this.has(i)) {
+            total++;
+        }
+    }
+    return total;
+}
+
+/**
+ * Sets the status of an achievement to won/earned.
+ */
+AA.AchievementManager.prototype.earn = function(name) {
+    if(this.achievements[name].won) return;    //Already won
+
+    this.achievements[name].won = true;
 
     //I use icon 18,18 because it is empty: right now, I'm not embedding my
     //custom icons into the notification dialogs
@@ -74,12 +124,18 @@ AA.earnAchievement = function(name) {
             'Achievement unlocked',
             '<div class="title" style="font-size:18px;">'+name+'</div>',
             [18,18]
-            );
+            );    
 }
 
-AA.hasAchievement = function(name) {
-    return (AA.achievements[name] ? AA.achievements[name].won : false);
+/**
+ * Returns true iff the player has earned the achievement.
+ */
+AA.AchievementManager.prototype.has = function(name) {
+    return (this.achievements[name] ? this.achievements[name].won : false);
 }
+
+//Here's the singleton
+AA.achievementManager = new AA.AchievementManager();
 
 ///////////////////////
 // Upgrade functions //
@@ -93,7 +149,11 @@ AA.UpgradeManager = function() {
 /**
  * Creates a generic upgrade data object and adds it to my upgrade list. This
  * stuff is separate from Orteil's code so that it will be less likely to break.
- * 
+ *
+ * If the upgrade already exists (generally this is the case for save data),
+ * then the data is merged with the existing upgrade data already present in
+ * the list. This helps avoid versioning problems that might occur.
+ *
  * @param data {name, description, image, baseCost, owned, unlocked}
  *
  */

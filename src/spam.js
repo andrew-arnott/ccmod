@@ -21,10 +21,26 @@ AA.spam.frenzyClicks = 0;                   //Count clicks during the event
 AA.spam.totalCookies = 0;                   //Count total cookies during the event
 AA.spam.cookieObjects = [];                 //A pool of divs that will be the spawning golden cookies
 
-AA.createAchievement("Spam spam spam spam...", "Click at least <b>25</b> golden cookies during a golden cookie spam event.", "spam0");
-AA.createAchievement("Spam! Lovely spam!", "Click at least <b>50</b> golden cookies during a golden cookie spam event.", "spam1");
-AA.createAchievement("Lovely spam! Wonderful spam!", "Click at least <b>75</b> golden cookies during a golden cookie spam event.", "spam2");
-AA.createAchievement("Spam bot", "Click at least <b>100</b> golden cookies during a golden cookie spam event.<q>Got a bigger pen fifteen by helping a Nigerian prince.</q>", "spam3");
+AA.achievementManager.createAchievement({
+    name: "Spam spam spam spam...",
+    description: "Click at least <b>25</b> golden cookies during a golden cookie spam event.",
+    image: "spam0"
+});
+AA.achievementManager.createAchievement({
+    name: "Spam! Lovely spam!",
+    description: "Click at least <b>50</b> golden cookies during a golden cookie spam event.",
+    image: "spam1"
+});
+AA.achievementManager.createAchievement({
+    name: "Lovely spam! Wonderful spam!",
+    description: "Click at least <b>75</b> golden cookies during a golden cookie spam event.",
+    image: "spam2"
+});
+AA.achievementManager.createAchievement({
+    name: "Spam bot",
+    description: "Click at least <b>100</b> golden cookies during a golden cookie spam event.<q>Got a bigger pen fifteen by helping a Nigerian prince.</q>",
+    image: "spam3"
+});
 
 /**
  * Called when the spam frenzy event starts.
@@ -50,16 +66,16 @@ AA.spam.endEvent = function() {
     }
 
     if(AA.spam.frenzyClicks >= 25) {
-        AA.earnAchievement("Spam spam spam spam...");
+        AA.achievementManager.earn("Spam spam spam spam...");
     }
     if(AA.spam.frenzyClicks >= 50) {
-        AA.earnAchievement("Spam! Lovely spam!");
+        AA.achievementManager.earn("Spam! Lovely spam!");
     }
     if(AA.spam.frenzyClicks >= 75) {
-        AA.earnAchievement("Lovely spam! Wonderful spam!");
+        AA.achievementManager.earn("Lovely spam! Wonderful spam!");
     }
     if(AA.spam.frenzyClicks >= 100) {
-        AA.earnAchievement("Spam bot");
+        AA.achievementManager.earn("Spam bot");
     }    
 }
 
